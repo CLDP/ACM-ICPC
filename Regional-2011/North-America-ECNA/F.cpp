@@ -1,43 +1,42 @@
 #include <iostream>
-#include <cstring>
+#include <cstdio>
 using namespace std;
 
 
 int main() {
-    int n, mm, m, a, b, nn = 0;
-    long long ans;
-    bool flag;
-    int x[100];
-    long long f[100];
-    cin >> n >> mm;
-    while (n != 0 || mm != 0) {
-        ++nn;
-        cout << "Case " << nn << ": ";
-        m = 0;
-        for (int i = 0; i < n; ++i) {
-            cin >> a >> b;
-            for (int j = 0; j < b; ++ j) x[m+j] = a;
-            m += b;
-        }
+    int n, nn = 0, m, a, b, s, t, ans;
+    int x[101][101], y[101][101];
+    cin >> n;
+    while (n != 0) {
         ans = 0;
-        flag = false;
-        for (int i = 0; i < m; ++i) {
-            if (i != 0 && x[i] == x[i-1]) continue;
-            memset(f, 0, sizeof(f));
-            f[0] = 1;
-            for (int j = 0; j < m; ++j)
-             if (i != j)
-              for (int k = 60; k >= x[j]; --k) f[k] += f[k-x[j]];
-            a = mm - x[i];
-            if (a < 0) a = 0;
-            for (int j = a; j < mm; ++j) ans += f[j];
-            if (flag) cout << " ";
-            cout << ans;
-            flag = true;
-            ans = 0;
+        ++nn;
+        for (int i = 0; i < n; ++i)
+         for (int j = 0; j < n; ++j) {
+             scanf("%d", &x[i][j]);
+             y[i][j] = x[i][j];
         }
-        cout << endl;
-        cin >> n >> mm;
+
+        for (int k = 0; k < n; ++k)
+         for (int i = 0; i < n; ++i)
+          for (int j = 0; j < n; ++j)
+           if (x[i][k] != 0 && x[k][j] != 0 && i != j)
+            if (x[i][k] + x[k][j] < x[i][j] || x[i][j] == 0) x[i][j] = x[i][k] + x[k][j];
+
+        cin >> m >> s;
+        t = s;
+        b = 0;
+        for (int i = 1; i < m; ++i) {
+            scanf("%d", &a);
+            b += y[t][a];
+            if (b > x[s][a]) {
+                ++ans;
+                b = 0;
+                s = a;
+            }
+            t = a;
+        }
+        cout << "Case " << nn << ": " << ans << endl;
+        cin >> n;
     }
 
     return 0;
