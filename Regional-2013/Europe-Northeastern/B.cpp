@@ -16,34 +16,34 @@ int main() {
     
     cin >> n >> a >> b;
     if (a + b < n) {
-		cout << 1 << endl << 1 << endl;
-		return 0;
+        cout << 1 << endl << 1 << endl;
+        return 0;
     }
     
     f[0][0][0] = 1.0;
     f[0][0][1] = 1.0;
     for (long long i = 0; i < n; ++i) {
-    	int ind = i % 2;
-    	for (long long j = 0; j <= min(a, i); ++j) {
-    		if (j < a) {
-    			f[ind^1][j+1][0] += 
-    			    f[ind][j][0] * ((long double)(2 * (a - j))) / (2 * (a - j) + b - i + j + 2);
-    			f[ind^1][j+1][1] += 
-    			    f[ind][j][1] * ((long double)(2 * (a - j))) / (2 * (a - j) + b - i + j + 1);
-    		}
-    		if (i - j < b) {
-    			f[ind^1][j][0] += 
-    			    f[ind][j][0] * ((long double)(b - i + j)) / (2 * (a - j) + b - i + j + 2);
-    			f[ind^1][j][1] += 
-    			    f[ind][j][1] * ((long double)(b - i + j)) / (2 * (a - j) + b - i + j + 1);    			
-    		}
-    		if (i - j <= b) {
-				win[0] += f[ind][j][0] * ((long double)(2)) / (2 * (a - j) + b - i + j + 2);
-				win[1] += f[ind][j][1] * ((long double)(1)) / (2 * (a - j) + b - i + j + 1);
-			}
-			f[ind][j][0] = 0;
-			f[ind][j][1] = 0;
-    	}
+        int ind = i % 2;
+        for (long long j = 0; j <= min(a, i); ++j) {
+            if (j < a) {
+                f[ind^1][j+1][0] += 
+                    f[ind][j][0] * ((long double)(2 * (a - j))) / (2 * (a - j) + b - i + j + 2);
+                f[ind^1][j+1][1] += 
+                    f[ind][j][1] * ((long double)(2 * (a - j))) / (2 * (a - j) + b - i + j + 1);
+            }
+            if (i - j < b) {
+                f[ind^1][j][0] += 
+                    f[ind][j][0] * ((long double)(b - i + j)) / (2 * (a - j) + b - i + j + 2);
+                f[ind^1][j][1] += 
+                    f[ind][j][1] * ((long double)(b - i + j)) / (2 * (a - j) + b - i + j + 1);
+            }
+            if (i - j <= b) {
+                win[0] += f[ind][j][0] * ((long double)(2)) / (2 * (a - j) + b - i + j + 2);
+                win[1] += f[ind][j][1] * ((long double)(1)) / (2 * (a - j) + b - i + j + 1);
+            }
+            f[ind][j][0] = 0;
+            f[ind][j][1] = 0;
+        }
     }
     
     cout.precision(12);
