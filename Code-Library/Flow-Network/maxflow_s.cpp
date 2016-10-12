@@ -57,7 +57,7 @@ int max_flow(int s, int t, int n) {
         
         --hh[h[i]];
         if (hh[h[i]] == 0) break;
-        h[i] = min + 1;
+        h[i] = minL + 1;
         ++hh[h[i]];
         if (i != s) {
             i = fa[i];
