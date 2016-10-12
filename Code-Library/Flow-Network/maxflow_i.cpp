@@ -1,6 +1,7 @@
 const int MAXN = 200100;
 const int INF = 1000000000;
 
+// destination, capacity
 vector<pair<int, int> > x[MAXN];
 
 // n must be total number of vertices
