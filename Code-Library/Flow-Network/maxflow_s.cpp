@@ -11,7 +11,6 @@ int max_flow(int s, int t, int n) {
     vector<int> h(n + 1, 0);
     vector<int> hh(n + 1, 0);
     vector<int> fi(n + 1, 0);
-    // vector<bool> z(n + 1, 0);
     
     int i = 0, now, ans = 0;
     hh[0] = n;
@@ -19,14 +18,11 @@ int max_flow(int s, int t, int n) {
     i = s;
     now = INF;
     
-    // while (true) 
     while (h[s] < n) {
-        // z[i] = true;
         ff[i] = now;
         bool flag = false;
         vector<pair<int, int> >::iterator p = x[i].begin();
         while (p != x[i].end()) {
-            // if (p->second > 0 && !z[p->first])
             if (p->second > 0 && h[p->first] + 1 == h[i]) {
                 flag = true;
                 if (p->second < now) now = p->second;
@@ -43,19 +39,17 @@ int max_flow(int s, int t, int n) {
                         x[tmp].push_back(make_pair(i, now));
                     }
                     now = INF;
-                    // z = vector<bool> (n + 1, false);
                 }
                 break;
             }
             ++p;
         }
         if (flag) continue;
-        // if (!flag && i == s) break;
         
-        int min = n-1;
+        int minL = n - 1;
         p = x[i].begin();
         while (p != x[i].end()) {
-            if (p->second > 0 && h[p->first] < min) min = h[p->first];
+            if (p->second > 0 && h[p->first] < minL) minL = h[p->first];
             ++p;
         }
         
