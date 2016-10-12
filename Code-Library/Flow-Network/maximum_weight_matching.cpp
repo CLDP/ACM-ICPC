@@ -46,5 +46,12 @@ int match(int N, int M) {
          if (y[j]) ly[j] += d;
     }
     
+    int flow = 0, cost = 0;
+    for (int i = 1; i <= M; ++i)
+     if (l[i] > 0) {
+         ++flow;
+         cost += z[l[i]][i];     
+     }
+    
     return 0;
 }
