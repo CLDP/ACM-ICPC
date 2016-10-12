@@ -1,9 +1,12 @@
 const int MAXN = 1001;
 const int INF = 1000000000;
 
+// z is the weight matrix input
 int z[MAXN][MAXN];
 bool x[MAXN], y[MAXN];
 int lx[MAXN], ly[MAXN];
+
+// l is the matching result, see below for usage
 int l[MAXN];
 
 bool find(int v, int M) {
