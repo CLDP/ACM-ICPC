@@ -5,6 +5,8 @@ vector<pair<int, int> > x[MAXN];
 
 // n must be total number of vertices
 // If too slow, try to do something obvious before call this function
+// This flow algorithm is level sensitive
+// The depth of the graph would effect run time a lot
 int max_flow(int s, int t, int n) {
     vector<int> ff(n + 1, 0);
     vector<int> fa(n + 1, 0);
