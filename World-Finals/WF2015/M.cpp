@@ -47,14 +47,6 @@ int find_time(vector<boundary> &Y, boundary X) {
     return T;
 }
 
-int print_boundary(vector<boundary> &Y, vector<int> &T) {
-    for (int i = 0; i < Y.size(); ++i) {
-        cout << Y[i].a << " " << Y[i].b << " " << Y[i].c << " " << Y[i].ID << endl;
-    }
-    for (int i = 0; i < T.size(); ++i) cout << T[i] << " "; cout << endl;
-    return 0;
-}
-
 int solve(vector<box> &X, int w, int j, int W, int times) {
     int w_org = w;
     vector<boundary> Y;
