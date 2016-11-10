@@ -81,17 +81,7 @@ bool check(vector<int> H) {
     for (int i = 0; i < 7; ++i) 
      for (int j = i + 2; j < 7; ++j) {
          if (i == 0 && j == 6) continue;
-         if (SegmentIntersection(X[H[i]], X[H[i + 1]], X[H[j]], X[H[j + 1]], trash)) {
-         /*
-             printP(X[H[i]]);
-             printP(X[H[i + 1]]);
-             printP(X[H[j]]);
-             printP(X[H[j + 1]]);
-             cout << i << " " << j << " " << SegmentIntersection(X[H[i]], X[H[i] + 1], X[H[j]], X[H[j + 1]], trash) << endl;
-             printP(trash);
-             */
-             return false;
-         }
+         if (SegmentIntersection(X[H[i]], X[H[i + 1]], X[H[j]], X[H[j + 1]], trash)) return false;
      }
     return true;
 }
