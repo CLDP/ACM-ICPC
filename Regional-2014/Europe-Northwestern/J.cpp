@@ -7,51 +7,33 @@
 #include <cstring>
 #include <iostream>
 #include <algorithm>
+#include <unordered_map>
 using namespace std;
 
-bool BF = true;
-int NN = 0;
-int A[10010], B[10010];
-vector<int> x[10010];
-
-int dfs(int a, int b, int c) {
-    if (b == -1) {
-        A[a] = ++NN;
-        B[a] = ++NN;
-    } else {
-        A[a] = c;
-        B[a] = ++NN;
-    }
-    
-    for (int i = 0; i < x[a].size(); ++i) {
-        if (x[a][i] == b) continue;
-        if (BF) {
-            BF = false;
-            dfs(x[a][i], a, A[a]);
-        } else 
-            dfs(x[a][i], a, B[a]);
-    }
-    
-    return 0;
-}
 
 int main() {
-    int N, a, b;
-    cin >> N;
-    for (int i = 1; i < N; ++i) {
-        scanf("%d%d", &a, &b);
-        x[a].push_back(b);
-        x[b].push_back(a);
+    int n, res = 0;
+    cin >> n;
+    unordered_map<string, int> m;
+    
+    for (int i = 0; i < n; ++i) {
+        string s;
+        cin >> s;
+        if (m.find(s) == m.end())
+            m[s] = 1;
+        else
+            ++m[s];
     }
-    if (N == 2) {
-        cout << "1 2\n1 2" << endl;
-        return 0;
+    for (int i = 0; i < n; ++i) {
+        string s;
+        cin >> s;
+        if (m[s] > 0) {
+            --m[s];
+            ++res;
+        }
     }
-    for (int i = 1; i <= N; ++i) {
-        if (x[i].size() == 1) continue;
-        dfs(i, -1, -1);
-        break;
-    }
-    for (int i = 1; i <= N; ++i) cout << A[i] << " " << B[i] << endl;
+    
+    cout << res << endl;
+
     return 0;
 }
