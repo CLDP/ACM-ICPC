@@ -9,32 +9,136 @@
 #include <algorithm>
 using namespace std;
 
-int f[200005];
-int l[200005];
-int r[200005];
+struct node {
+    long long t;
+    int d, remD;
+    int cn, cid;
+};
+
+map<int, node> m;
+vector<pair<int, node> > cur;
+node tn;
+int n, s, dt, d0 = -1;
+int lc[200005];
+
+void conV(node &n1, int curD) {
+    if (curD > n1.remD + n1.d) {
+        n1.t = 0;
+        n1.d = curD;
+        n1.remD = 0;
+    } else {
+        n1.t = n1.t >> (curD - n1.d);
+        n1.remD = n1.remD - curD + n1.d;
+        n1.d = curD;
+    }
+}
+
+long long getEffect(node &n1, int curD) {
+    if (curD > n1.remD + n1.d) return 0;
+    return n1.t >> (curD - n1.d);
+}
+
+long long pf[60];
 
 int main() {
-    int n, k;
-    
-    cin >> n >> k;
-    for (int i = 0; i < n; ++i) cin >> f[i];
-    l[0] = f[0];
-    for (int i = 1; i < n; ++i) {
-        l[i] = l[i-1] + f[i];
-        if (i >= k) l[i] = l[i] - f[i-k];
+    pf[0] = 1;
+    for (int i = 1; i < 57; ++i) pf[i] = pf[i-1] * 2;
+
+    cin >> n >> s >> dt;
+    tn.t = 0;
+    tn.d = -1;
+    tn.remD = 0;
+    tn.cn = 0;
+    tn.cid = -1;
+    m[s] = tn;
+    int minD = 1;
+    long long tmp = 2;
+    while (tmp <= dt) {
+        minD++;
+        tmp *= 2;
     }
-    r[n-1] = f[n-1];
-    for (int i = n - 2; i >= 0; --i) {
-        r[i] = r[i+1] + f[i];
-        if (i + k < n) r[i] = r[i] - f[i+k];
+    
+    for (int i = 0; i < n; ++i) {
+        int d, l, h;
+        cin >> d >> l >> h;
+        if (d != d0) {
+            for (int j = 0; j < cur.size(); ++j) {
+                map<int, node>::iterator it = m.lower_bound(cur[j].first);
+                if (it != m.end()) {
+                    if (cur[j].second.t >= getEffect(it->second, d0)) continue;
+                }
+                while (true) {
+                    it = m.upper_bound(cur[j].first);
+                    if (it == m.begin()) {
+                        m[cur[j].first] = cur[j].second;
+                        break;
+                    }
+                    --it;
+                    if (cur[j].second.t <= getEffect(it->second, d0))
+                        m.erase(it);
+                    else {
+                        m[cur[j].first] = cur[j].second;
+                        break;
+                    }
+                }
+            }
+            cur.clear();
+            d0 = d;
+        }
+        map<int, node>::iterator it = m.lower_bound(l);
+        if (it != m.end()) {
+            tn = it->second;
+            lc[i] = tn.cid;
+            if (tn.d != d - 1) conV(tn, d-1);
+            int nl = h - tn.t;
+            if (tn.d == d - 1) {
+                tn.t += dt;
+                tn.remD = max(tn.remD, minD);
+                tn.d = d;
+            } else {
+                conV(tn, d);
+                tn.t += dt;
+                tn.remD = max(tn.remD, minD);
+            }
+            tn.cn++;
+            tn.cid = i;
+            while (pf[tn.remD] <= tn.t) tn.remD++;
+            cur.push_back(make_pair(nl, tn));
+        }
     }
-    for (int i = 1; i < n; ++i) l[i] = max(l[i], l[i-1]);
-    for (int i = n - 2; i >= 0; --i) r[i] = max(r[i], r[i+1]);
+    for (int j = 0; j < cur.size(); ++j) {
+        map<int, node>::iterator it = m.lower_bound(cur[j].first);
+        if (it != m.end()) {
+            if (cur[j].second.t >= getEffect(it->second, d0)) continue;
+        }
+        while (true) {
+            it = m.upper_bound(cur[j].first);
+            if (it == m.begin()) {
+                m[cur[j].first] = cur[j].second;
+                break;
+            }
+            --it;
+            if (cur[j].second.t <= getEffect(it->second, d0))
+                m.erase(it);
+            else {
+                m[cur[j].first] = cur[j].second;
+                break;
+            }
+        }
+    }
     
-    int res = f[0];
-    for (int i = 1; i < n; ++i) res = max(res, l[i-1] + r[i]);
-    
-    cout << res << endl;
+    cout << m.rbegin()->first << " " << m.rbegin()->second.cn << endl;
+    vector<int> cs;
+    int ind = m.rbegin()->second.cid;
+    while (ind != -1) {
+        cs.push_back(ind);
+        ind = lc[ind];
+    }
+    if (cs.size() > 0) {
+        for (int i = cs.size() - 1; i > 0; --i) cout << cs[i] + 1 << " ";
+        cout << cs[0] + 1;
+    }
+    cout << endl;
 
     return 0;
 }
