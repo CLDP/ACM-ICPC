@@ -2,6 +2,7 @@ vector<int> x[MAXN];
 int dfn[MAXN], low[MAXN];
 bool z[MAXN][MAXN];
 
+// times is initialized to be 1
 void bridges(int a, int f, int &times) {
     dfn[a] = low[a] = times; 
     int s = 0;
