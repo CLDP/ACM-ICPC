@@ -4,8 +4,7 @@ bool z[MAXN][MAXN];
 
 // times is initialized to be 1
 void bridges(int a, int f, int &times) {
-    dfn[a] = low[a] = times; 
-    bool flag = false;
+    dfn[a] = low[a] = times;
     for (int i = 0; i < x[a].size(); ++i) {
         if (x[a][i] == f) continue;
         if (dfn[x[a][i]] == 0) {
