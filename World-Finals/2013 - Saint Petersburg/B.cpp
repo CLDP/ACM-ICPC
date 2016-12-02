@@ -9,7 +9,7 @@ int main() {
     x /= 100;
     p /= 100;
     if (p == 0) {
-        cout << 0 << endl;
+        printf("%.9lf\n", 0);
         return 0;
     }
     double r = (1 - p) / p;
