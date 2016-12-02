@@ -12,15 +12,15 @@ const int MAXM = 100010;
 
 string fl0, fl1, fr0, fr1, fl2, fr2, fm;
 long long g0, g1, g2;
-int next[MAXN];
+int nextt[MAXN];
 
 int Get_Next(const string &p) {
-    int j = 1, k = -1;
-    next[0] = -1;
+    int j = 0, k = -1;
+    nextt[0] = -1;
     while (j < p.size()) 
      if (k == -1 || p[j] == p[k]) {
-         next[++j] = ++k;
-     } else k = next[k];
+         nextt[++j] = ++k;
+     } else k = nextt[k];
     return 0;
 }
 
@@ -33,7 +33,7 @@ long long KMP(string &p, string &q) {   //find the position    p in q
          ++i;
          ++j;
          if (i == lenp - 1) ++ans;
-     } else i = next[i];
+     } else i = nextt[i];
      return ans;
 }
 
