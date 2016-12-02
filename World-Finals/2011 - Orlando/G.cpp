@@ -64,8 +64,6 @@ double deal(int A, int B) {
         ans += cross(P[i + 1].first - RR, P[i + 1].second, P[i].first - RR, P[i].second);
     }
     
-    if (flag) fabs(ans) / 2;
-    
     return max(fabs(ans) / 2, deal(A, a - 1) + deal(a + 1, B));
 }
 
