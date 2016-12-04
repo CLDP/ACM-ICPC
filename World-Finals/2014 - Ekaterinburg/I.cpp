@@ -28,17 +28,6 @@ bool find(int v, int M) {
     return 0;
 }
 
-bool check(int a, int N, int M, bool flag) {
-    if (flag) {
-        for (int i = 1; i <= M; ++i) 
-         if (x[a][i]) return false;
-        return true;
-    }
-    for (int i = 1; i <= N; ++i)
-     if (x[i][a]) return false;
-    return true;
-}
-
 int getside(int t, int a, int b) {
     if (dist(a, t) > dist(a, b)) return 2;
     if (dist(b, t) > dist(a, b)) return 2;
@@ -120,10 +109,10 @@ int main() {
                     dfs(p, R, S, true);
                 }
                 for (int p = 1; p <= A.size(); ++p) {
-                    if (cz[p] || check(p, R, S, true)) ansT.push_back(A[p - 1]);
+                    if (cz[p]) ansT.push_back(A[p - 1]);
                 }
                 for (int p = 1; p <= B.size(); ++p) {
-                    if (!cz[R + p] || check(p, R, S, false)) ansT.push_back(B[p - 1]);
+                    if (!cz[R + p]) ansT.push_back(B[p - 1]);
                 }
             }
             
