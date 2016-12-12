@@ -125,7 +125,7 @@ double ans, C[MAXN], A[MAXN][MAXN], R[MAXN], X[MAXN];
 
 /*
  * Input: first line: number of variables, inequalities
- * Second line: c[i], goal is to maximize sum C[i] * X[i]
+ * Second line: C[i], goal is to maximize sum C[i] * X[i]
  * Following m lines, sum A[i][j] * X[j] <= R[i]
  * Must memset (C, A, R, X, ans) before reusing them
  *
