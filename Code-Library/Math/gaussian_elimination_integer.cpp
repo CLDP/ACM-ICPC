@@ -31,6 +31,7 @@ void clear(int b[], int M) {
 // Gaussian Elimination
 // sum A[i][j] * X[j] = A[i][M]
 // N equations, M variables
+// Indices start from 0
 // return 0 if no solution, otherwise 1
 // return arbitrary solution if infinitely many
 int gauss(int N, int M) {
