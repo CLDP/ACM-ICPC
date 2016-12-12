@@ -129,7 +129,8 @@ double ans, C[MAXN], A[MAXN][MAXN], R[MAXN], X[MAXN];
  * Following m lines, sum A[i][j] * X[j] <= R[i]
  * Must memset (C, A, R, X, ans) before reusing them
  *
- * You probably need to +SHIFT to each R[i] to make it stable
+ * You probably need to +SHIFT to each R[i] to make it stable,
+ * especially when input has equations
  * This version is faster than everything global without parameters,
  * and I don't know why, and one can easily modify it 
  * This version is also faster than the well-known version 
