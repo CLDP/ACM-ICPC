@@ -16,6 +16,7 @@ int modular(int x, int m) {
 
 // a and m must be relatively prime
 // return x such that ax = 1 mod m
+// otherwise return ax = gcd(a, m) mod m
 int modular_inverse(int a, int m) {
     int x, y;
     extended_euclidean(a, m, x, y);
