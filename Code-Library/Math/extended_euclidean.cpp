@@ -1,3 +1,4 @@
+// The result guarantees that |x|+|y| is minimized
 int extended_euclidean(int a, int b, int &x, int &y) {
     if (b == 0) {
         x = 1;
