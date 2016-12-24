@@ -1,12 +1,11 @@
 #include <iostream>
 #include <cmath>
-#include <complex>
 #include <algorithm>
 using namespace std;
 
 const double EPS = 1e-8;
 const int MAXN = 210;
-const double INF = 1e5;
+const double INF = 2 * 1e4;
 
 struct CPoint { 
     double x, y; 
@@ -81,102 +80,88 @@ int GrahamScan(CPoint ch[], int n, int &m) {
     return 0; 
 }
 
-typedef complex<double> point;
+typedef CPoint Vector;
 
-inline int dbcmp(double d) { return d < -EPS ? -1 : (d > EPS);}
-double operator ^ (point a, point b) { return imag(conj(a) * b);}
-
-struct line {
-    point a, b;
-    double angle;
-    line() {}
-    line(point _a, point _b) :a(_a), b(_b) {angle = arg(_b - _a);}
-    bool operator < (line const &l) const {
-        return dbcmp(angle - l.angle) < 0 ||
-               (dbcmp(angle - l.angle) == 0 && dbcmp(b - a ^ l.b - a) < 0);
+struct Line {
+    // point on the line
+    CPoint p;
+    // direction
+    Vector v;
+    // angle from x+ to vector v
+    double ang;
+    Line() {}
+    Line(CPoint p, Vector v): p(p), v(v) {ang = atan2(v.y, v.x);}
+    bool operator < (const Line &L) const {
+        return ang < L.ang;
     }
 };
-
-point operator * (const line &u, const line &v) {
-    point ret = u.a;
-    double t = u.a - v.a ^ v.b - v.a;
-    double s = u.a - u.b ^ v.b - v.a;
-    return ret + (u.b - u.a) * t / s;
+Vector operator + (Vector A, Vector B) {
+    return Vector(A.x + B.x, A.y + B.y);
+}
+Vector operator - (CPoint A, CPoint B) {
+    return Vector(A.x - B.x, A.y - B.y);
+}
+Vector operator * (Vector A, double p) {
+    return Vector(A.x * p, A.y * p);
+}
+Vector operator / (Vector A, double p) {
+    return Vector(A.x / p, A.y / p);
+}
+double Cross(Vector A, Vector B) {
+    return A.x * B.y - A.y * B.x;
+}
+bool OnLeft(Line L, CPoint P) {
+    return Cross(L.v, P - L.p) > 0;
+}
+CPoint GetIntersection(Line a, Line b) {
+    Vector u = a.p - b.p;
+    double t = Cross(b.v, u) / Cross(a.v, b.v);
+    return a.p + a.v * t;
 }
 
-point p[MAXN];
-line l[MAXN];
-
-bool onLeft(point p1, line u){
-    return dbcmp(p1 - u.a ^ u.b - u.a) <= 0;
-}
-
-bool uniquecmp(line u, line v){
-    return dbcmp(u.angle - v.angle) == 0;
-}
-
-// Get the core of half plane and save in l
-int gethe(line *l, int lsz, point *p) {
-    int e[MAXN];
-    int eb = 0, ee = 2, pb = 0, pe = 1, psz = 1;
-    sort(l, l + lsz);
-    p[lsz] = p[0];
-    // left only one for each slope
-    lsz = distance(l, unique(l, l + lsz, uniquecmp));
-    e[0] = 0;
-    e[1] = 1;
-    p[0] = l[0] * l[1];
-    for (int i = 2; i < lsz; ++i) {
-        while (pb != pe && !onLeft(p[pe - 1], l[i])) --pe, --ee;
-        while (pb != pe && !onLeft(p[pb], l[i])) ++pb, ++eb;
-        p[pe++] = l[i] * l[e[ee - 1]];
-        e[ee++] = i;
+int HalfplaneIntersection(Line *L, int n, CPoint *poly) {
+    sort(L, L + n);
+    int first = 0, last = 0;
+    CPoint *p = new CPoint[n];
+    Line *q = new Line[n];
+    q[0] = L[0];
+    for (int i = 1; i < n; ++i) {
+        while (first < last && !OnLeft(L[i], p[last - 1])) --last;
+        while (first < last && !OnLeft(L[i], p[first])) ++first;
+        q[++last] = L[i];
+        if (fabs(Cross(q[last].v, q[last - 1].v)) < EPS) {
+            // Two parallel lines, same direction
+            --last;
+            if (OnLeft(q[last], L[i].p)) q[last] = L[i];
+        }
+        if (first < last) p[last - 1] = GetIntersection(q[last - 1], q[last]);
     }
-    while (pb != pe && !onLeft(p[pe - 1], l[e[eb]])) --pe, --ee;
-    while (pb != pe && !onLeft(p[pb], l[e[ee - 1]])) ++pb, ++eb;
-    p[pe++] = l[e[pb]] * l[e[ee - 1]];
-    psz = pe - pb;
-    for (int i = 0; pb != pe; ++i) p[i] = p[pb++];
-    return psz;
+    // Remove useless half planes
+    while (first < last && !OnLeft(q[first], p[last - 1])) --last;
+    // Need to add four boundary lines to make this correct
+    // Or if you know the given region is bounded
+    if (last - first <= 1) return 0; 
+    p[last] = GetIntersection(q[last], q[first]);
+
+    int m = 0;
+    for (int i = first; i <= last; ++i) poly[m++] = p[i];
+    delete[] p;
+    delete[] q;
+    return m;
 }
 
-double area(point *p, int n) {
-    p[n] = p[0];
-    double sum = 0;
-    for (int i = 0; i < n; ++i) sum += p[i] ^ p[i + 1];
-    return fabs(sum) / 2;
+double PolygonArea(CPoint *p, int n) {
+    double area = 0;
+    for (int i = 1; i < n - 1; ++i) area += Cross(p[i] - p[0], p[i + 1] - p[0]);
+    return fabs(area) / 2;
 }
 
-double half_plane_intersection(CPoint ch1[], int N, CPoint ch2[], int M) {
-    ch1[N] = ch1[0];
-    ch2[M] = ch2[0];
-    for (int i = 0; i < N; ++i) {
-        l[i] = line(point(ch1[i + 1].x, ch1[i + 1].y), point(ch1[i].x, ch1[i].y));
-    }
-    for (int i = 0; i < M; ++i) {
-        l[i + N] = line(point(ch2[i + 1].x, ch2[i + 1].y), point(ch2[i].x, ch2[i].y));
-    }
-
-    int psz = gethe(l, N + M, p);
-    if (psz < 3) return 0;
-    return area(p, psz);
-}
-
-bool touch(CPoint ch1[], int N, CPoint ch2[], int M) {
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < M; ++j)
-         if (PointOnSegment(ch1[i], ch2[j], ch2[(j + 1) % M])) return true;
-    }
-    for (int j = 0; j < M; ++j) {
-        for (int i = 0; i < N; ++i) 
-         if (PointOnSegment(ch2[j], ch1[i], ch1[(i + 1) % N])) return true;
-    }
-    return false;
-}
 
 int N, M;
 double mx, my;
 CPoint X[11], Y[11], Z[22];
+Line L[MAXN];
+CPoint P[MAXN];
 
 int makeZ(double T) {
     for (int i = 0; i < N; ++i) {
@@ -193,6 +178,33 @@ int makeS(double T) {
         Z[i].y = X[i].y + my * T;
     }
     return 0;
+}
+
+double half_plane_intersection(CPoint ch1[], int N, CPoint ch2[], int M) {
+    ch1[N] = ch1[0];
+    ch2[M] = ch2[0];
+    for (int i = 0; i < N; ++i) {
+        L[i] = Line(ch1[i], ch1[i] - ch1[i + 1]);
+    }
+    for (int i = 0; i < M; ++i) {
+        L[i + N] = Line(ch2[i], ch2[i] - ch2[i + 1]);
+    }
+
+    int m = HalfplaneIntersection(L, N + M, P);
+    if (!m) return 0;
+    return PolygonArea(P, m);
+}
+
+bool touch(CPoint ch1[], int N, CPoint ch2[], int M) {
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < M; ++j)
+         if (PointOnSegment(ch1[i], ch2[j], ch2[(j + 1) % M])) return true;
+    }
+    for (int j = 0; j < M; ++j) {
+        for (int i = 0; i < N; ++i) 
+         if (PointOnSegment(ch2[j], ch1[i], ch1[(i + 1) % N])) return true;
+    }
+    return false;
 }
 
 int main() {
