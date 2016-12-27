@@ -4,91 +4,75 @@
 #include <algorithm>
 using namespace std;
 
-const int MAXN = 410;
+const int MAXN = 210;
 const int INF = 2000000000;
 
 int N, nn;
-bool cz[MAXN];
-int f[MAXN], d[MAXN], z[MAXN];
-int x[MAXN / 2][MAXN / 2];
-vector<int> X[MAXN], Y[MAXN];
+bool cz[MAXN * 2];
+int z[MAXN * 2];
+int x[MAXN][MAXN];
 
-int find(int a) {
-    if (a != f[a]) f[a] = find(f[a]);
-    return f[a]; 
-}
 
-int Union(int a, int b) {
-    a = find(a);
-    b = find(b);
-    if (a == b) return 0;
-    if (d[a] > d[b]) f[b] = f[a]; else f[a] = f[b];
-    d[a] += d[b];
-    d[b] = d[a];
-    return 0;
-}
+struct TwoSAT {
+    int n;
+    vector<int> G[MAXN * 2];
+    bool mark[MAXN * 2];
+    int S[MAXN * 2], c;
 
-int dfs1(int a) {
-    cz[a] = true;
-    for (int i = 0; i < X[a].size(); ++i) {
-        if (!cz[X[a][i]]) dfs1(X[a][i]);
-    } 
-    z[nn--] = a;
-    return 0;
-}
-
-int dfs2(int a, int b) {
-    cz[a] = true;
-    for (int i = 0; i < Y[a].size(); ++i) {
-        if (!cz[Y[a][i]]) dfs2(Y[a][i], b);
+    bool dfs(int x) {
+        if (mark[x ^ 1]) return false;
+        if (mark[x]) return true;
+        mark[x] = true;
+        S[c++] = x;
+        for (int i = 0; i < G[x].size(); ++i) 
+            if (!dfs(G[x][i])) return false;
+        return true;
     }
-    Union(a, b);
-    return 0;
-}
+
+    void init(int n) {
+        this->n = n;
+        for (int i = 0; i < n * 2; ++i) G[i].clear();
+        memset(mark, 0, sizeof(mark));
+    }
+
+    // xv = 1 if x, 0 if ~x
+    void add_clause(int x, int xv, int y, int yv) {
+        x = x * 2 + xv;
+        y = y * 2 + yv;
+        G[x ^ 1].push_back(y);
+        G[y ^ 1].push_back(x);
+    }
+
+    bool solve() {
+        for (int i = 0; i < n * 2; i += 2) {
+            if (mark[i] || mark[i + 1]) continue;
+            c = 0;
+            if (!dfs(i)) {
+                while (c > 0) mark[S[--c]] = false;
+                if (!dfs(i + 1)) return false;
+            }
+        }
+        return true;
+    }
+};
+
+TwoSAT ts;
 
 
 bool check(const int &D1, const int &D2) {
-    for (int i = 0; i < N + N; ++i) {
-        X[i].clear();
-        Y[i].clear();
+    ts.init(N);
+    for (int i = 0; i < N; ++i) {
+        for (int j = i + 1; j < N; ++j) {
+            if (x[i][j] > D2) {
+                ts.add_clause(i, 1, j, 1);
+                ts.add_clause(i, 0, j, 0);
+            } else
+            if (x[i][j] > D1) {
+                ts.add_clause(i, 0, j, 0);
+            }
+        }
     }
-    
-    for (int i = 0; i < N; ++i) 
-     for (int j = i + 1; j < N; ++j) {
-         if (x[i][j] > D2) {
-             X[N + i].push_back(j);
-             X[N + j].push_back(i);
-             X[i].push_back(N + j);
-             X[j].push_back(N + i);
-             Y[N + i].push_back(j);
-             Y[N + j].push_back(i);
-             Y[i].push_back(N + j);
-             Y[j].push_back(N + i);
-         } else
-         if (x[i][j] > D1) {
-             X[i].push_back(N + j);
-             X[j].push_back(N + i);
-             Y[N + i].push_back(j);
-             Y[N + j].push_back(i);
-         }
-     }
-    
-    nn = N + N;
-    memset(cz, 0, sizeof(cz));
-    for (int i = 0; i < N + N; ++i) {
-        if (!cz[i]) dfs1(i);
-        f[i] = i;
-        d[i] = 1;
-    }
-    memset(cz, 0, sizeof(cz));
-    for (int i = 1; i <= N + N; ++i) {
-        if (!cz[z[i]]) dfs2(z[i], z[i]);
-    }
-    
-    for (int i = 0; i < N; ++i)
-     if (find(i) == find(N + i)) return false;
-    
-    return true;
+    return ts.solve();
 }
 
 int MST(vector<int> &T) {
