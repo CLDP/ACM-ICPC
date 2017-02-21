@@ -63,7 +63,8 @@ public:
             }
         }
     }
-
+    
+    // Don't forget to call this function!!!!!
     void getFail() {
         queue<int> Q;
         f[0] = 0;
