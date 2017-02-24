@@ -78,17 +78,6 @@ void PolyMulti(double *A, int na, double *B, int nb, double* &C, int &nc) {
     delete[] yc;
 }
 
-void convolution(double *A, double *B, double* &C, int n) {
-    double *D = new double[n];
-    D[0] = B[0];
-    for (int i = 1; i < n; ++i) D[i] = B[n - i];
-    int m = 0;
-    PolyMulti(A, n, D, n, C, m);
-    for (int i = 0; i < n; ++i) C[i] += C[i + n];
-    delete[] D;
-}
-
-
 int main() {
     ios_base::sync_with_stdio(false);
     int N = 500000;
@@ -100,16 +89,16 @@ int main() {
         }
     }
 
-    int M = N + N;
-    double *A = new double[M];
-    double *B = new double[M];
-    for (int i = 0; i < M; ++i) A[i] = B[i] = 0;
-    for (int i = 1; i <= N; ++i) A[N + i - 1] = B[N - i] = X[i];
+    double *A = new double[N];
+    double *B = new double[N];
+    for (int i = 0; i < N; ++i) A[i] = B[i] = X[i + 1];
 
+    int M = 0;
     double *C;
-    convolution(A, B, C, M);
-    for (int i = 1; i <= N; ++i) {
-        f[i][0] = round(C[i - 1]);
+    PolyMulti(A, N, B, N, C, M);
+    g[1][0] = 1;
+    for (int i = 2; i <= N; ++i) {
+        f[i][0] = round(C[i - 2]);
         g[i][0] = i;
     }
     delete[] A;
