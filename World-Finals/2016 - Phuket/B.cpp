@@ -31,7 +31,9 @@ int Dijkstra(vector<pair<int, int> > X[], int N, int s) {
     return 0;
 }
 
+int g[MAXN][MAXN];
 long long f[MAXN][MAXN];
+long long sum[MAXN];
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -48,19 +50,31 @@ int main() {
     Dijkstra(Y, N, B + 1);
     sort(D + 1, D + B + 1);
 
-    long long sum = 0;
     for (int i = 1; i <= B; ++i) {
-        sum += D[i];
-        f[i][1] = sum * (i - 1);
+        sum[i] = sum[i - 1] + D[i];
+        f[i][1] = sum[i] * (i - 1);
+        g[i][1] = 1;
     }
 
     for (int j = 2; j <= S; ++j) {
-        for (int i = j; i <= B; ++i) {
-            long long sum = 0;
+        f[B][j] = f[B][j - 1];
+        g[B][j] = B;
+        for (int k = 2; k <= B; ++k) {
+            long long temp = f[k - 1][j - 1] + (sum[B] - sum[k - 1]) * (B - k);
+            if (temp < f[B][j]) {
+                f[B][j] = temp;
+                g[B][j] = k;
+            }
+        }
+        for (int i = B - 1; i >= j; --i) {
             f[i][j] = f[i][j - 1];
-            for (int k = i; k >= max(j, i - i / j - 1); --k) {
-                sum += D[k];
-                f[i][j] = min(f[i][j], f[k - 1][j - 1] + sum * (i - k));
+            g[i][j] = i;
+            for (int k = g[i][j - 1]; k <= g[i + 1][j]; ++k) {
+                long long temp = f[k - 1][j - 1] + (sum[i] - sum[k - 1]) * (i - k);
+                if (temp < f[i][j]) {
+                    f[i][j] = temp;
+                    g[i][j] = k;
+                }
             }
         }
     }
