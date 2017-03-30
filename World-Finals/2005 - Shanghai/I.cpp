@@ -6,115 +6,121 @@
 #include <cstdlib>
 using namespace std;
 
-const int MAXN = 2101;
+const int MAXN = 1001;
 const int INF = 1000000000;
 
-class node {
-public:
-    int v, w, f, couple;
-    node() { v = 0; w = 0; f = 0; }
-    node(int V, int W, int F, int CC) {v = V; w = W; f = F; couple = CC;};
-};
+// z is the weight matrix input
+int z[MAXN][MAXN], zz[MAXN][MAXN];
+bool x[MAXN], y[MAXN];
+int lx[MAXN], ly[MAXN];
 
-int n, m, flow, cost;
-int fa[MAXN], ff[MAXN];
-vector<node> x[MAXN];
+// l is the matching result, see below for usage
+int l[MAXN], ll[MAXN], flow, cost;
 
-// s, t, capacity, cost
-int newnode(int a, int b, int c, int d) {
-    node p(b, d, c, x[b].size());
-    node q(a, -d, 0, x[a].size());
-    x[a].push_back(p);
-    x[b].push_back(q);
-    return 0;
-}
-
-int SPFA(int s, int t) {
-    vector<int> d(n + 1, INF);
-    vector<bool> z(n + 1, false);
-    d[s] = 0;
-    queue<int> que;
-    que.push(s);
-    z[s] = true;
-    while (!que.empty()) {
-        int i = que.front();
-        que.pop();
-        for (vector<node>::iterator p = x[i].begin(); p != x[i].end(); ++p) {
-            if (p->f > 0 && d[p->v] > d[i] + p->w) {
-                d[p->v] = d[i] + p->w;
-                fa[p->v] = i;
-                ff[p->v] = p - x[i].begin();
-                if (!z[p->v]) {
-                    z[p->v] = true;
-                    que.push(p->v);
-                }
-            }
+bool find(int v, int M) {
+    int k;
+    x[v] = true;
+    for (int i = 1; i <= M; ++i) {
+        if (!y[i] && lx[v] + ly[i] == z[v][i]) {
+            y[i] = true;
+            k = l[i];
+            l[i] = v;
+            if (k == 0 || find(k, M)) return true;
+            l[i] = k;
         }
-        z[i] = false;
     }
-    return d[t];
+    return false;
 }
 
-int Min_Cost(int s, int t) {
-    while (SPFA(s,t) < INF) {
-        int i = t, now = INF;
-        while (i != s) {
-            node &p = x[fa[i]][ff[i]];
-            i = fa[i];
-            if (p.f < now) now = p.f;
+int match(int N, int M, int t) {
+    for (int i = 1; i <= N; ++i) {
+        for (int j = 1; j <= M; ++j) {
+            if (z[i][j] > lx[i]) lx[i] = z[i][j];
         }
-        flow += now;
+    }
+      
+    for (int k = t + 1; k <= N; ++k) while (true) {
+        if (ll[k]) break;
+        memset(x, 0, sizeof(x));
+        memset(y, 0, sizeof(y));
         
-        i = t;
-        while (i != s) {
-            x[fa[i]][ff[i]].f -= now;
-            cost += now * x[fa[i]][ff[i]].w;
-            x[i][x[fa[i]][ff[i]].couple].f += now;
-            i = fa[i];
-        }
+        if (find(k, M)) break;
+        int d = INF;
+        for (int i = 1; i <= N; ++i) if (x[i])
+         for (int j = 1; j <= M; ++j) if (!y[j])
+          if (d > lx[i] + ly[j] - z[i][j]) d = lx[i] + ly[j] - z[i][j];
+        
+        for (int i = 1; i <= N; ++i)
+         if (x[i]) lx[i] -= d;
+        
+        for (int j = 1; j <= M; ++j) 
+         if (y[j]) ly[j] += d;
     }
+    
+    flow = cost = 0;
+    for (int i = 1; i <= M; ++i) {
+        if (l[i] == 0 || z[l[i]][i] == 1) continue;
+        ++flow;
+        cost += z[l[i]][i] - 1;
+    }
+    
     return 0;
 }
 
+pair<int, int> X[MAXN];
+pair<int, int> Y[MAXN];
 
 int main() {
+    ios_base::sync_with_stdio(false);
     int times = 0, N, M;
     while (cin >> N) {
         if (N == 0) break;
-        vector<pair<int, int> > X(N);
         int total = 0;
         for (int i = 0; i < N; ++i) {
             cin >> X[i].first >> X[i].second;
             total += X[i].first;
         }
         cin >> M;
-        vector<pair<int, int> > Y(N);
-        
         for (int i = 0; i < M; ++i) {
             string P;
             cin >> Y[i].first >> P;
             Y[i].second = (atoi(P.substr(0, 2).c_str()) - 14) * 60 + atoi(P.substr(3, 2).c_str());
         }
         
-        int s = N + M + 1, t = s + 1;
-        for (int i = 1; i <= t; ++i) x[i].clear();
-        memset(fa, 0, sizeof(fa));
-        memset(ff, 0, sizeof(ff));
-        flow = cost = 0;
-        n = t;
-        
-        for (int i = 0; i < N; ++i)
-         for (int j = 0; j < M; ++j) 
-          if (X[i].second <= Y[i].second) {
-              newnode(i + 1, N + j + 1, 1, -X[i].first);
-          }
-        
-        for (int i = 1; i <= N; ++i) newnode(s, i, 1, 0);
-        for (int j = 1; j <= M; ++j) newnode(N + j, t, 1, 0);
-        
-        Min_Cost(s, t);
-        cout << "Trial " << ++times << ": " << N - flow << " " << total + cost << endl << endl;
+        memset(lx, 0, sizeof(lx));
+        memset(ly, 0, sizeof(ly));
+        memset(l, 0, sizeof(l));
+        vector<int> S, K;
+        for (int i = 0; i < N; ++i) {
+            zz[i + 1][M + i + 1] = 1;
+            bool flag = true;
+            for (int j = 0; j < M; ++j) {
+                zz[i + 1][j + 1] = 1;
+                if (X[i].first <= Y[j].first && X[i].second <= Y[j].second) {
+                    zz[i + 1][j + 1] = X[i].first + 1;
+                    if (flag && l[j + 1] == 0) {
+                        l[j + 1] = S.size() + 1;
+                        S.push_back(i + 1);
+                        flag = false;
+                    }
+                }
+            }
+            if (flag) K.push_back(i + 1);
+        }
+
+        for (int i = 0; i < S.size(); ++i) {
+            for (int j = 1; j <= M; ++j) z[i + 1][j] = zz[S[i]][j];
+        }
+        for (int i = 0; i < K.size(); ++i) {
+            for (int j = 1; j <= M; ++j) z[S.size() + i + 1][j] = zz[K[i]][j];
+        } 
+        if (N > M) {
+            for (int i = 1; i <= N; ++i) {
+                for (int j = M + 1; j <= N; ++j) z[i][j] = 1;
+            }
+        }
+        match(N, max(N, M), S.size());
+        cout << "Trial " << ++times << ": " << N - flow << " " << total - cost << endl << endl;
     }
     return 0;
 }
-
