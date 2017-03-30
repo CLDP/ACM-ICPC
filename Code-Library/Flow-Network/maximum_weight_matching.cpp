@@ -23,6 +23,8 @@ bool find(int v, int M) {
     return false;
 }
 
+// requires an input with perfect matching
+// otherwise will go into infinite loop
 int match(int N, int M) {
     memset(lx, 0, sizeof(lx));
     memset(ly, 0, sizeof(ly));
