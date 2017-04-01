@@ -15,7 +15,7 @@ double asr(double a, double b, double EPS, double A) {
     double c = a + (b - a) / 2;
     double L = simpson(a, c), R = simpson(c, b);
     if (fabs(L + R - A) <= 15 * EPS) return L + R + (L + R - A) / 15.0;
-    return asr(a, c, EPS / 2, L) + asr(c, b, EPS / 2, R);
+    return asr(a, c, EPS, L) + asr(c, b, EPS, R);
 }
 
 int main () {
