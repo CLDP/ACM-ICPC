@@ -8,14 +8,15 @@ bool z[MAXN];
 
 bool find(int v, int M) {
     int k;
-    for (int i = 1; i <= M; ++i) 
-     if (!z[i] && x[v][i]) {
-         z[i] = 1;
-         k = l[i];
-         l[i] = v;
-         if (!k || find(k, M)) return 1;
-         l[i] = k;
-     }
+    for (int i = 1; i <= M; ++i) {
+        if (!z[i] && x[v][i]) {
+            z[i] = 1;
+            k = l[i];
+            l[i] = v;
+            if (!k || find(k, M)) return 1;
+            l[i] = k;
+        }
+    }
     return 0;
 }
 
